@@ -34,11 +34,12 @@ struct ChatView: View {
                     text = ""
                 }label: {
                        Text("Send")
-                        .padding()
+                        .frame(width:80, height: 50)
                         .background(.blue)
                         .foregroundColor(.white)
                         .cornerRadius(50.0)
                 }
+                .padding()
             }
             .background(Color(UIColor.systemGray6))
             .cornerRadius(6.0)

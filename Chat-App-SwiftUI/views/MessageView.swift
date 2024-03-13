@@ -38,7 +38,7 @@ struct MessageView: View {
                 
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
-            .padding()
+            .padding(.horizontal)
         } else {
             HStack{
                 if let photURl = message.fetchPhotoURL() {
@@ -62,7 +62,7 @@ struct MessageView: View {
                 .frame(maxWidth: 260, alignment: .leading)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
+            .padding(.horizontal)
         }
     }
 }
