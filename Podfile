@@ -8,10 +8,8 @@ target 'Chat-App-SwiftUI' do
   pod 'Firebase/Messaging', '10.17.0'
   pod 'Firebase/Core', '10.17.0'
   pod 'Firebase/Database', '10.17.0'
-  pod 'Firebase/Storage', '10.17.0'
-  pod 'FirebaseUI/Storage', '13.1.0'
-  pod 'Firebase/Analytics', '10.17.0'
   pod 'Firebase/Auth', '10.17.0'
   pod 'Firebase/Firestore', '10.17.0'
   pod 'GoogleSignIn'
+  pod 'SDWebImageSwiftUI', '2.2.6'
 end

@@ -7,14 +7,28 @@
 
 import Foundation
 
-struct Message:Decodable, Identifiable {
-    var id = UUID()
+struct Message : Decodable, Identifiable {
+    let id = UUID()
     let userUid:String
     let text:String
     let photoURL:String?
     let ceratedAt: Date
     
     func isFromCurrentUser () -> Bool {
-        return false
+        guard let currUser = AuthManager.shared.getCurrentUser() else {
+            return false
+        }
+        if currUser.uid == userUid {
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    func fetchPhotoURL() -> URL? {
+        guard let photURLString = photoURL , let url = URL(string: photURLString) else {
+            return nil
+        }
+        return url
     }
 }

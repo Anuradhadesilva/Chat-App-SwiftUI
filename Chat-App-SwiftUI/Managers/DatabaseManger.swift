@@ -7,14 +7,19 @@
 
 import Foundation
 import FirebaseFirestore
+
+enum FetchMessageError: Error{
+    case snapshotError
+}
 final class DatabaseManager {
     static let shared = DatabaseManager()
     
     let messageRef = Firestore.firestore().collection("messages")
     
-    func fetchMessages(completion:@escaping (Result <[Message], Error>) -> Void){
+    func fetchMessages(completion:@escaping (Result <[Message], FetchMessageError>) -> Void){
         messageRef.order(by:"createdAt", descending: true).limit(to: 25).getDocuments{ snapshot, error in
             guard let snapshot = snapshot, error == nil else {
+                completion(.failure(.snapshotError))
                 return
             }
             let docs = snapshot.documents
@@ -30,13 +35,14 @@ final class DatabaseManager {
                 let msg = Message(userUid: userUid, text: text, photoURL: photoURL, ceratedAt: createdAt.dateValue())
                 messages.append(msg)
             }
+            completion(.success(messages.reversed()))
         }
     }
     
     func sendMessageToDatabase(message: Message, completion:@escaping (Bool) -> Void){
         let data = [
             "text" : message.text,
-            "userId": message.userUid,
+            "userUid": message.userUid,
             "photoURL": message.photoURL,
             "createdAt": Timestamp(date: message.ceratedAt)
         ] as [String : Any]

@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import SDWebImageSwiftUI
+import SDWebImage
 
 struct MessageView: View {
     var message:Message
@@ -16,28 +18,48 @@ struct MessageView: View {
                 HStack{
                     Text(message.text)
                         .padding()
+                        .background(Color(uiColor:.systemBlue))
+                        .cornerRadius(20)
                     
                 }
-                .frame(maxWidth: 260, alignment: .topLeading)
-                .background(.gray)
-                .cornerRadius(20)
-                Image(systemName: "person.circle")
-                    .frame(maxHeight: 50, alignment: .top)
+                .frame(maxWidth: 260, alignment: .trailing)
+                if let photURl = message.fetchPhotoURL() {
+                    WebImage(url: photURl)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 32, maxHeight: 32,  alignment:.trailing)
+                        .cornerRadius(16)
+                } else {
+                    Image(systemName: "person.circle")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 32, maxHeight: 32,  alignment:.trailing)
+                }
+                
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
             .padding()
         } else {
             HStack{
-                Image(systemName: "person.circle")
-                    .frame(maxHeight: 50, alignment: .top)
+                if let photURl = message.fetchPhotoURL() {
+                    WebImage(url: photURl)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 32, maxHeight: 32,  alignment:.trailing)
+                        .cornerRadius(16)
+                } else {
+                    Image(systemName: "person.circle")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 32, maxHeight: 32,  alignment:.top)
+                }
                 HStack{
                     Text(message.text)
                         .padding()
-                    
+                        .background(Color(uiColor:.systemGray4))
+                        .cornerRadius(20)
                 }
                 .frame(maxWidth: 260, alignment: .leading)
-                .background(.gray)
-                .cornerRadius(20)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()

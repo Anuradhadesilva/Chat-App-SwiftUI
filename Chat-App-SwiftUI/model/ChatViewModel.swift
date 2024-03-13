@@ -18,14 +18,25 @@ class ChatViewModel:ObservableObject{
         
     ]
     
+    init() {
+        DatabaseManager.shared.fetchMessages{ [weak self] result in
+            switch result {
+            case .success(let msgs):
+                self?.messages = msgs
+            case.failure(let error):
+                print(error)
+            }
+        }
+    }
+    
     func sendMessage(text: String, completion:@escaping (Bool) -> Void){
         guard let user = AuthManager.shared.getCurrentUser() else {
            return
         }
         let msg = Message(userUid: user.uid, text: text, photoURL: user.photoURL, ceratedAt: Date())
-        DatabaseManager.shared.sendMessageToDatabase(message: msg){ success in
+        DatabaseManager.shared.sendMessageToDatabase(message: msg){ [weak self] success in
             if success {
-                self.messages.append(msg)
+                self?.messages.append(msg)
                 completion(true)
             } else {
                 completion(false)

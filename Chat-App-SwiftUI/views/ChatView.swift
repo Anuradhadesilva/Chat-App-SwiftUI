@@ -15,7 +15,7 @@ struct ChatView: View {
         VStack{
             ScrollView(showsIndicators: false){
                 VStack(spacing: 8){
-                    ForEach(chatViewModel.mockData) {message in
+                    ForEach(chatViewModel.messages) {message in
                         MessageView(message: message)
                     }
                 }
@@ -24,7 +24,14 @@ struct ChatView: View {
                 TextField("Hello there", text: $text, axis: .vertical)
                     .padding()
                 Button{
-                    chatViewModel.sendMessage(text: text)
+                    chatViewModel.sendMessage(text: text) { success in
+                        if success {
+                            
+                        }else {
+                            print("error sending message")
+                        }
+                    }
+                    text = ""
                 }label: {
                        Text("Send")
                         .padding()
