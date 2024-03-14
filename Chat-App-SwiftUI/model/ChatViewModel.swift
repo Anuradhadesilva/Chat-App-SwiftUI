@@ -6,10 +6,10 @@
 //
 
 import Foundation
-
+import Combine
 class ChatViewModel:ObservableObject{
     @Published var messages = [Message]()
-    
+    var subcribers: Set<AnyCancellable> = []
     @Published var mockData = [
         Message(userUid: "123", text: "HI, How are you ?", photoURL: "", ceratedAt: Date()),
         Message(userUid: "123", text: "Where are you from?", photoURL: "", ceratedAt: Date()),
@@ -27,6 +27,8 @@ class ChatViewModel:ObservableObject{
                 print(error)
             }
         }
+        subscribeToMessagePublisher()
+//        subscribeToMessagePublisher()
     }
     
     func sendMessage(text: String, completion:@escaping (Bool) -> Void){
@@ -42,5 +44,18 @@ class ChatViewModel:ObservableObject{
                 completion(false)
             }
         }
+    }
+    
+    func refresh() {
+        self.messages = messages
+    }
+    
+    private func subscribeToMessagePublisher(){
+        DatabaseManager.shared.messagePublisher.receive(on: DispatchQueue.main)
+            .sink{ completion in
+                print(completion)
+            } receiveValue: { [weak self] messages in
+                self?.messages = messages
+            }.store(in: &subcribers)
     }
 }

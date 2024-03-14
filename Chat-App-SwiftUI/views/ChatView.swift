@@ -9,17 +9,25 @@ import SwiftUI
 
 struct ChatView: View {
     
-    @ObservedObject var chatViewModel:ChatViewModel
+    @StateObject var chatViewModel:ChatViewModel
     @State var text = ""
     var body: some View {
         VStack{
-            ScrollView(showsIndicators: false){
-                VStack(spacing: 8){
-                    ForEach(chatViewModel.messages) {message in
-                        MessageView(message: message)
+            ScrollViewReader{ scrollView in
+                ScrollView(showsIndicators: false){
+                    VStack(spacing: 8){
+                        ForEach(Array(chatViewModel.messages.enumerated()), id: \.element) {index, message in
+                            MessageView(message: message)
+                                .id(index)
+                        }
+                        .onChange(of: chatViewModel.messages){ newValue in
+                            scrollView.scrollTo(chatViewModel.messages.count , anchor: .bottom)
+                        }
                     }
                 }
             }
+            .scrollDismissesKeyboard(.interactively)
+
             HStack{
                 TextField("Hello there", text: $text, axis: .vertical)
                     .padding()

@@ -4,7 +4,7 @@
 //
 //  Created by Anuradha Desilva on 12/03/2024.
 //
-
+import Combine
 import Foundation
 import FirebaseFirestore
 
@@ -16,26 +16,17 @@ final class DatabaseManager {
     
     let messageRef = Firestore.firestore().collection("messages")
     
+    var messagePublisher = PassthroughSubject<[Message], Error>()
+    
     func fetchMessages(completion:@escaping (Result <[Message], FetchMessageError>) -> Void){
-        messageRef.order(by:"createdAt", descending: true).limit(to: 25).getDocuments{ snapshot, error in
-            guard let snapshot = snapshot, error == nil else {
+        messageRef.order(by:"createdAt", descending: true).limit(to: 25).getDocuments{ [weak self] snapshot, error in
+            guard let snapshot = snapshot, let strongSelf = self, error == nil else  {
                 completion(.failure(.snapshotError))
                 return
             }
-            let docs = snapshot.documents
-            var messages = [Message]()
-            
-            for doc in docs {
-                let data = doc.data()
-                let text = data["text"] as? String ?? "Error"
-                let userUid = data["userUid"] as? String ?? "Error"
-                let photoURL = data["photoURL"] as? String ?? "Error"
-                let createdAt = data["createdAt"] as? Timestamp ?? Timestamp()
-                
-                let msg = Message(userUid: userUid, text: text, photoURL: photoURL, ceratedAt: createdAt.dateValue())
-                messages.append(msg)
-            }
-            completion(.success(messages.reversed()))
+            strongSelf.ListenToNewMassages()
+            let messages = strongSelf.createMessageFromSnapShot(snapshot: snapshot)
+            completion(.success(messages))
         }
     }
     
@@ -54,5 +45,32 @@ final class DatabaseManager {
             completion(true)
         }
         
+    }
+    
+    func ListenToNewMassages(){
+        messageRef.order(by:"createdAt", descending: true).limit(to: 25).addSnapshotListener{ [weak self] snapshot, error in
+            guard let snapshot = snapshot, let strongSelf = self, error == nil else {
+                return
+            }
+            let messages = strongSelf.createMessageFromSnapShot(snapshot: snapshot)
+            strongSelf.messagePublisher.send(messages)
+        }
+    }
+    
+    func createMessageFromSnapShot(snapshot: QuerySnapshot) -> [Message]{
+        let docs = snapshot.documents
+        var messages = [Message]()
+        
+        for doc in docs {
+            let data = doc.data()
+            let text = data["text"] as? String ?? "Error"
+            let userUid = data["userUid"] as? String ?? "Error"
+            let photoURL = data["photoURL"] as? String ?? "Error"
+            let createdAt = data["createdAt"] as? Timestamp ?? Timestamp()
+            
+            let msg = Message(userUid: userUid, text: text, photoURL: photoURL, ceratedAt: createdAt.dateValue())
+            messages.append(msg)
+        }
+        return messages.reversed()
     }
 }
